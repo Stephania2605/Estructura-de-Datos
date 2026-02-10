@@ -1,1 +1,1 @@
-
+Mi programa consiste en un inventario de ventas de distintos departamentos en los meses del año, baandose de eso usamos un menu para que el usuario pueda acceder a los diferentes metodos,en este caso usamos el metodo modificar venta que basicamente cambia el precio del producto, otro metodo es buscar venta donde te solicita el mes y el departamento que buscas para poder hallar el articulo y el ultimo es eliminar venta donde se entiende que vas a eliminar el producto que selccionaste.
