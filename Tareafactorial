@@ -1,0 +1,33 @@
+import time
+
+# Solución Recursiva (Basada en tu imagen)
+def fibonacci_recursivo(n):
+    if n <= 1:
+        return n
+    else:
+        return fibonacci_recursivo(n-1) + fibonacci_recursivo(n-2)
+
+# Solución Iterativa
+def fibonacci_iterativo(n):
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+# Prueba de rendimiento
+n = 35  # Usamos 35 porque la recursión simple es muy lenta para números grandes
+print(f"Calculando Fibonacci de {n}...")
+
+# Medir Recursivo
+start = time.time()
+res_rec = fibonacci_recursivo(n)
+end = time.time()
+print(f"Recursivo: {res_rec} | Tiempo: {end - start:.5f} segundos")
+
+# Medir Iterativo
+start = time.time()
+res_ite = fibonacci_iterativo(n)
+end = time.time()
+print(f"Iterativo: {res_ite} | Tiempo: {end - start:.5f} segundos")
