@@ -1,1 +1,42 @@
+class Cola:
+    def __init__(self):
+        self.items = []
 
+    def enqueue(self, item):
+        self.items.append(item)
+
+    def dequeue(self):
+        if not self.is_empty():
+            return self.items.pop(0)
+        return None
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+def sumar_colas(cola_a, cola_b):
+    cola_resultado = Cola()
+    
+    # Mientras ambas colas tengan elementos
+    while not cola_a.is_empty() and not cola_b.is_empty():
+        num_a = cola_a.dequeue()
+        num_b = cola_b.dequeue()
+        cola_resultado.enqueue(num_a + num_b)
+    
+    return cola_resultado
+
+# --- Prueba del Ejercicio 1 ---
+cola_a = Cola()
+cola_b = Cola()
+
+# Datos del ejemplo
+for n in [3, 4, 2, 8, 12]: cola_a.enqueue(n)
+for n in [6, 2, 9, 11, 3]: cola_b.enqueue(n)
+
+resultado = sumar_colas(cola_a, cola_b)
+
+print("Resultado de la suma de colas:")
+while not resultado.is_empty():
+    print(resultado.dequeue())
