@@ -1,1 +1,1 @@
-
+¿Qué pasó con las listas? pues al eliminar un postre del arreglo, su lista enlazada de ingredientes pierde toda referencia en memoria. Python la libera automáticamente. No genera un error visible, pero los datos desaparecen. Por eso la solución correcta fusiona primero los ingredientes y elimina después.
