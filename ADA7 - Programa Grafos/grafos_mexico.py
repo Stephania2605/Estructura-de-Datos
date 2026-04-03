@@ -52,11 +52,7 @@ def mostrar_relaciones(grafo):
 
 
 def camino_hamiltoniano(grafo, inicio="Yucatán"):
-    """
-    Encuentra el camino Hamiltoniano de menor costo desde 'inicio'
-    visitando todos los estados exactamente una vez.
-    Usa backtracking (fuerza bruta sobre permutaciones de los demás nodos).
-    """
+   
     otros = [e for e in ESTADOS if e != inicio]
     mejor_costo = float("inf")
     mejor_ruta = None
@@ -80,13 +76,7 @@ def camino_hamiltoniano(grafo, inicio="Yucatán"):
 
 
 def recorrido_con_repeticion(grafo, inicio="Yucatán"):
-    """
-    Encuentra el recorrido más corto que visita todos los estados
-    REPITIENDO AL MENOS UNO de ellos obligatoriamente.
-    Estrategia: toma el camino hamiltoniano óptimo e inserta
-    una visita extra al nodo de menor costo de reinsertar (ida y vuelta
-    desde algún punto de la ruta), garantizando así la repetición.
-    """
+    
     ruta_base, _ = camino_hamiltoniano(grafo, inicio)
 
     mejor_extra = float("inf")
