@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Métodos de Ordenamiento</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2538;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --accent0: #6c8eff;
+    --accent1: #3ecf8e;
+    --accent2: #f59e42;
+    --accent0d: rgba(108,142,255,0.15);
+    --accent1d: rgba(62,207,142,0.15);
+    --accent2d: rgba(245,158,66,0.15);
+    --red: #ff5f7e;
+    --redd: rgba(255,95,126,0.15);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg2);
+  }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent0); }
+  .badge {
+    font-size: 11px; font-family: var(--mono);
+    padding: 3px 10px; border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main { display: flex; flex: 1; min-height: 0; }
+  .sidebar {
+    width: 220px; min-width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .sidebar-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    color: var(--muted); text-transform: uppercase;
+    padding: 4px 8px; margin-bottom: 4px;
+  }
+  .algo-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    background: transparent; color: var(--muted);
+    cursor: pointer; font-family: var(--sans);
+    font-size: 13px; font-weight: 400;
+    transition: all .2s; text-align: left;
+  }
+  .algo-btn:hover { background: var(--bg3); color: var(--text); }
+  .algo-btn.active-0 { background: var(--accent0d); border-color: rgba(108,142,255,.3); color: var(--accent0); }
+  .algo-btn.active-1 { background: var(--accent1d); border-color: rgba(62,207,142,.3); color: var(--accent1); }
+  .algo-btn.active-2 { background: var(--accent2d); border-color: rgba(245,158,66,.3); color: var(--accent2); }
+  .algo-num {
+    width: 22px; height: 22px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; font-family: var(--mono);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); color: var(--muted); flex-shrink: 0;
+  }
+  .algo-btn.active-0 .algo-num { background: var(--accent0); color: #fff; }
+  .algo-btn.active-1 .algo-num { background: var(--accent1); color: #fff; }
+  .algo-btn.active-2 .algo-num { background: var(--accent2); color: #fff; }
+
+  .sidebar-sep { height: 1px; background: var(--border); margin: 10px 0; }
+
+  .preset-group { display: flex; flex-direction: column; gap: 4px; }
+  .preset-btn {
+    padding: 7px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: pointer; font-family: var(--sans);
+    font-size: 12px; text-align: left; transition: all .15s;
+  }
+  .preset-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+
+  /* ── FILE UPLOAD ── */
+  .file-upload-area {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .file-slot {
+    position: relative; border: 1.5px dashed var(--border2);
+    border-radius: var(--radius-sm); padding: 8px 10px;
+    background: var(--bg3); cursor: pointer;
+    transition: all .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .file-slot:hover { border-color: var(--accent0); background: var(--accent0d); }
+  .file-slot input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+  }
+  .file-slot-icon { font-size: 14px; flex-shrink: 0; }
+  .file-slot-info { display: flex; flex-direction: column; min-width: 0; }
+  .file-slot-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+  .file-slot-name { font-size: 11px; color: var(--text); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-slot.loaded { border-color: var(--accent1); background: var(--accent1d); }
+  .file-slot.loaded .file-slot-icon::after { content: ' ✓'; color: var(--accent1); }
+  .file-merge-btn {
+    padding: 7px 12px; border-radius: var(--radius-sm);
+    border: none; background: var(--accent0); color: #fff;
+    cursor: pointer; font-family: var(--sans);
+    font-size: 12px; font-weight: 600; transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .file-merge-btn:hover { opacity: .85; }
+  .file-merge-btn:disabled { opacity: .35; cursor: not-allowed; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+  .file-status { font-size: 10px; color: var(--muted); text-align: center; font-family: var(--mono); min-height: 13px; }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOP: INPUT + CONTROLS ── */
+  .top-panel {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .input-row { display: flex; gap: 12px; align-items: flex-end; }
+  .input-group { flex: 1; }
+  .input-group label {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--muted); letter-spacing: .06em;
+    text-transform: uppercase; margin-bottom: 7px;
+  }
+  .data-input {
+    width: 100%; padding: 10px 14px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: var(--mono); font-size: 15px; font-weight: 500;
+    outline: none; transition: border-color .2s;
+  }
+  .data-input:focus { border-color: var(--accent0); }
+  .err-msg { font-size: 11px; color: var(--red); margin-top: 5px; min-height: 14px; }
+
+  .run-btn {
+    padding: 10px 22px; border-radius: var(--radius-sm);
+    border: none; font-family: var(--sans); font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: all .18s;
+    white-space: nowrap;
+  }
+  .run-btn.go { background: var(--accent0); color: #fff; }
+  .run-btn.go:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* speed & step controls */
+  .ctrl-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 12px; flex-wrap: wrap;
+  }
+  .step-btn {
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border2); background: var(--bg3);
+    color: var(--text); cursor: pointer; font-family: var(--sans);
+    font-size: 13px; font-weight: 500; transition: all .15s;
+  }
+  .step-btn:hover { background: var(--bg); border-color: var(--accent0); color: var(--accent0); }
+  .step-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .play-btn {
+    padding: 7px 16px; border-radius: var(--radius-sm);
+    border: none; background: var(--accent1); color: #fff;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+  }
+  .play-btn.pause { background: var(--red); }
+  .play-btn:hover { opacity: .85; }
+
+  .speed-ctrl {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted); margin-left: auto;
+  }
+  input[type=range] {
+    -webkit-appearance: none; width: 90px; height: 4px;
+    background: var(--bg3); border-radius: 2px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    background: var(--accent0); border-radius: 50%; cursor: pointer;
+  }
+  .step-counter {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted); padding: 4px 10px;
+    background: var(--bg3); border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── VIS AREA ── */
+  .vis-panel {
+    flex: 1; display: flex; flex-direction: column;
+    overflow: auto; padding: 20px 24px;
+  }
+
+  /* bars */
+  .bars-section { margin-bottom: 20px; }
+  .section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .bars-wrap {
+    display: flex; align-items: flex-end; gap: 5px;
+    height: 140px; padding: 0 4px;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 20px; }
+  .bar {
+    width: 100%; border-radius: 4px 4px 0 0;
+    transition: height .4s cubic-bezier(.4,0,.2,1), background-color .3s;
+    min-height: 4px;
+  }
+  .bar-num {
+    font-size: 10px; font-family: var(--mono);
+    color: var(--muted); margin-top: 5px;
+    transition: color .3s;
+  }
+
+  /* step info */
+  .step-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px;
+  }
+  .step-card-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+  .step-card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* array rows */
+  .rows-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .arr-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .row-label {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    min-width: 100px; text-align: right; flex-shrink: 0;
+  }
+  .cell {
+    padding: 6px 12px; border-radius: 7px;
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--bg3); color: var(--text);
+    transition: all .3s; min-width: 40px; text-align: center;
+  }
+  .cell.c0 { background: var(--accent0d); border-color: rgba(108,142,255,.4); color: var(--accent0); }
+  .cell.c1 { background: var(--accent1d); border-color: rgba(62,207,142,.4); color: var(--accent1); }
+  .cell.c2 { background: var(--accent2d); border-color: rgba(245,158,66,.4); color: var(--accent2); }
+  .cell.cr { background: var(--redd); border-color: rgba(255,95,126,.4); color: var(--red); }
+
+  /* progress */
+  .prog-bar-outer {
+    height: 3px; background: var(--bg3); border-radius: 2px;
+    margin-bottom: 14px; overflow: hidden;
+  }
+  .prog-bar-inner {
+    height: 100%; border-radius: 2px;
+    background: var(--accent0); transition: width .35s;
+  }
+
+  /* legend */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ── CODE PANEL ── */
+  .code-panel {
+    width: 340px; min-width: 340px;
+    background: var(--bg2); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .code-header {
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header-title { font-size: 13px; font-weight: 600; }
+  .copy-btn {
+    padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--muted); cursor: pointer; font-size: 11px;
+    font-family: var(--sans); transition: all .15s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--border2); background: var(--bg3); }
+  .code-scroll { flex: 1; overflow: auto; padding: 16px 18px; }
+  pre {
+    font-family: var(--mono); font-size: 12px; line-height: 1.75;
+    color: #abb2bf; white-space: pre; tab-size: 4;
+  }
+  .kw { color: #c678dd; }
+  .fn { color: #61afef; }
+  .cm { color: #5c6370; font-style: italic; }
+  .num { color: #d19a66; }
+  .str { color: #98c379; }
+  .hl { background: rgba(108,142,255,.12); display: block; margin: 0 -18px; padding: 0 18px; border-left: 2px solid var(--accent0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Sort<span>Lab</span> <span style="color:var(--muted);font-weight:300">·</span> Python</div>
+  <div class="badge">3 algoritmos · visualizador interactivo</div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-label">Algoritmo</div>
+    <button class="algo-btn active-0" id="ab0" onclick="selectAlgo(0)">
+      <span class="algo-num">1</span> Intercalación
+    </button>
+    <button class="algo-btn" id="ab1" onclick="selectAlgo(1)">
+      <span class="algo-num">2</span> Mezcla Directa
+    </button>
+    <button class="algo-btn" id="ab2" onclick="selectAlgo(2)">
+      <span class="algo-num">3</span> Mezcla Equilibrada
+    </button>
+
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-label">Ejemplos rápidos</div>
+    <div class="preset-group">
+      <button class="preset-btn" onclick="usePreset('85,62,91,74,50,88,67,43')">Calificaciones</button>
+      <button class="preset-btn" onclick="usePreset('18,22,25,15,20,30,10,12')">Temperaturas</button>
+      <button class="preset-btn" onclick="usePreset('304,101,502,203,405,150')">Inventario</button>
+      <button class="preset-btn" onclick="usePreset('9,8,7,6,5,4,3,2,1')">Inverso</button>
+      <button class="preset-btn" onclick="usePreset('1,2,3,4,5,6,7,8')">Ya ordenado</button>
+      <button class="preset-btn" onclick="randPreset()">Aleatorio</button>
+    </div>
+
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-label">Cargar archivos</div>
+    <div class="file-upload-area">
+      <div class="file-slot" id="slot1">
+        <input type="file" onchange="loadFile(1, this)" title="Archivo 1">
+        <span class="file-slot-icon">📄</span>
+        <div class="file-slot-info">
+          <span class="file-slot-label">Archivo 1</span>
+          <span class="file-slot-name" id="fname1">Cualquier archivo</span>
+        </div>
+      </div>
+      <div class="file-slot" id="slot2">
+        <input type="file" onchange="loadFile(2, this)" title="Archivo 2">
+        <span class="file-slot-icon">📄</span>
+        <div class="file-slot-info">
+          <span class="file-slot-label">Archivo 2</span>
+          <span class="file-slot-name" id="fname2">Cualquier archivo</span>
+        </div>
+      </div>
+      <button class="file-merge-btn" id="btn-merge" onclick="mergeFiles()" disabled>
+        &#9889; Combinar y ordenar
+      </button>
+      <div class="file-status" id="file-status">Carga uno o dos archivos</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- TOP INPUT -->
+    <div class="top-panel">
+      <div class="input-row">
+        <div class="input-group">
+          <label>Tus números (separados por comas)</label>
+          <input class="data-input" id="data-in" value="85, 62, 91, 74, 50, 88, 67, 43" spellcheck="false" oninput="onInputChange()">
+          <div class="err-msg" id="err"></div>
+        </div>
+        <button class="run-btn go" onclick="startVis()">▶ Ejecutar</button>
+      </div>
+      <div class="ctrl-row">
+        <button class="step-btn" id="btn-prev" onclick="step(-1)">← Anterior</button>
+        <button class="step-btn" id="btn-next" onclick="step(1)">Siguiente →</button>
+        <button class="play-btn" id="btn-play" onclick="togglePlay()">⏵ Auto</button>
+        <button class="step-btn" onclick="resetVis()">↺ Reiniciar</button>
+        <span class="step-counter" id="scounter">— / —</span>
+        <div class="speed-ctrl">
+          <span>Velocidad</span>
+          <input type="range" min="1" max="5" value="3" step="1" id="speed" oninput="updateSpeed()">
+          <span id="speed-lbl">normal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIS -->
+    <div class="vis-panel">
+      <div class="prog-bar-outer"><div class="prog-bar-inner" id="prog" style="width:0"></div></div>
+
+      <div class="legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--accent0)"></div> Comparando</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--accent1)"></div> Ordenado / resultado</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--accent2)"></div> Buffer / run activo</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--red)"></div> Intercalando</div>
+      </div>
+
+      <div class="bars-section">
+        <div class="section-label">Representación de barras</div>
+        <div class="bars-wrap" id="bars"></div>
+      </div>
+
+      <div class="step-card" id="step-card">
+        <div class="step-card-title" id="step-title">Listo para comenzar</div>
+        <div class="step-card-desc" id="step-desc">Ingresa números y presiona Ejecutar, o usa un ejemplo rápido del panel izquierdo.</div>
+      </div>
+
+      <div class="section-label">Estado del arreglo</div>
+      <div class="rows-section" id="rows-wrap"></div>
+    </div>
+  </div>
+
+  <!-- CODE PANEL -->
+  <div class="code-panel">
+    <div class="code-header">
+      <div class="code-header-title" id="code-title">Código Python</div>
+      <button class="copy-btn" onclick="copyCode()">Copiar</button>
+    </div>
+    <div class="code-scroll">
+      <pre id="code-view"></pre>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CODES = [
+`<span class="cm"># Ejercicio 1: Intercalación (Merge Sort)</span>
+<span class="cm"># Ordena calificaciones de estudiantes</span>
+
+<span class="kw">def</span> <span class="fn">mezclar</span>(izq, der):
+    resultado = []
+    i = j = <span class="num">0</span>
+    <span class="kw">while</span> i &lt; len(izq) <span class="kw">and</span> j &lt; len(der):
+        <span class="kw">if</span> izq[i] &lt;= der[j]:
+            resultado.append(izq[i])
+            i += <span class="num">1</span>
+        <span class="kw">else</span>:
+            resultado.append(der[j])
+            j += <span class="num">1</span>
+    resultado += izq[i:]
+    resultado += der[j:]
+    <span class="kw">return</span> resultado
+
+
+<span class="kw">def</span> <span class="fn">intercalacion</span>(arr):
+    <span class="cm"># Caso base</span>
+    <span class="kw">if</span> len(arr) &lt;= <span class="num">1</span>:
+        <span class="kw">return</span> arr
+
+    mid = len(arr) // <span class="num">2</span>
+    <span class="cm"># Dividir y ordenar recursivamente</span>
+    izq = <span class="fn">intercalacion</span>(arr[:mid])
+    der = <span class="fn">intercalacion</span>(arr[mid:])
+    <span class="cm"># Intercalar ambas partes</span>
+    <span class="kw">return</span> <span class="fn">mezclar</span>(izq, der)
+
+
+<span class="cm"># ── Modifica aquí tus datos ──────────────────</span>
+calificaciones = [<span class="num">85</span>, <span class="num">62</span>, <span class="num">91</span>, <span class="num">74</span>, <span class="num">50</span>, <span class="num">88</span>, <span class="num">67</span>, <span class="num">43</span>]
+resultado = <span class="fn">intercalacion</span>(calificaciones)
+print(<span class="str">f"Original : {calificaciones}"</span>)
+print(<span class="str">f"Ordenado : {resultado}"</span>)`,
+
+`<span class="cm"># Ejercicio 2: Mezcla Directa (Natural Merge Sort)</span>
+<span class="cm"># Ordena temperaturas parcialmente ordenadas</span>
+
+<span class="kw">def</span> <span class="fn">obtener_runs</span>(arr):
+    <span class="cm"># Detecta secuencias ya ordenadas</span>
+    runs = []
+    i = <span class="num">0</span>
+    <span class="kw">while</span> i &lt; len(arr):
+        run = [arr[i]]
+        <span class="kw">while</span> (i + <span class="num">1</span> &lt; len(arr)
+               <span class="kw">and</span> arr[i] &lt;= arr[i + <span class="num">1</span>]):
+            i += <span class="num">1</span>
+            run.append(arr[i])
+        runs.append(run)
+        i += <span class="num">1</span>
+    <span class="kw">return</span> runs
+
+
+<span class="kw">def</span> <span class="fn">mezclar_listas</span>(a, b):
+    resultado = []
+    i = j = <span class="num">0</span>
+    <span class="kw">while</span> i &lt; len(a) <span class="kw">and</span> j &lt; len(b):
+        <span class="kw">if</span> a[i] &lt;= b[j]:
+            resultado.append(a[i]); i += <span class="num">1</span>
+        <span class="kw">else</span>:
+            resultado.append(b[j]); j += <span class="num">1</span>
+    <span class="kw">return</span> resultado + a[i:] + b[j:]
+
+
+<span class="kw">def</span> <span class="fn">mezcla_directa</span>(arr):
+    runs = <span class="fn">obtener_runs</span>(arr)
+    <span class="kw">while</span> len(runs) > <span class="num">1</span>:
+        nuevos = []
+        <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">0</span>, len(runs), <span class="num">2</span>):
+            <span class="kw">if</span> i + <span class="num">1</span> &lt; len(runs):
+                nuevos.append(
+                    <span class="fn">mezclar_listas</span>(runs[i], runs[i+<span class="num">1</span>])
+                )
+            <span class="kw">else</span>:
+                nuevos.append(runs[i])
+        runs = nuevos
+    <span class="kw">return</span> runs[<span class="num">0</span>] <span class="kw">if</span> runs <span class="kw">else</span> []
+
+
+<span class="cm"># ── Modifica aquí tus datos ──────────────────</span>
+temps = [<span class="num">18</span>, <span class="num">22</span>, <span class="num">25</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">10</span>, <span class="num">12</span>]
+runs  = <span class="fn">obtener_runs</span>(temps)
+print(<span class="str">f"Runs detectados: {len(runs)}"</span>)
+<span class="kw">for</span> i, r <span class="kw">in</span> enumerate(runs, <span class="num">1</span>):
+    print(<span class="str">f"  Run {i}: {r}"</span>)
+print(<span class="str">f"Ordenado: {<span class="fn">mezcla_directa</span>(temps)}"</span>)`,
+
+`<span class="cm"># Ejercicio 3: Mezcla Equilibrada</span>
+<span class="cm"># Ordena códigos de inventario con 2 buffers</span>
+
+<span class="kw">def</span> <span class="fn">mezcla_equilibrada</span>(arr):
+    <span class="kw">if</span> len(arr) &lt;= <span class="num">1</span>:
+        <span class="kw">return</span> arr
+
+    <span class="cm"># Paso 1: Distribuir en dos buffers alternados</span>
+    buf_a = [arr[i] <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">0</span>, len(arr), <span class="num">2</span>)]
+    buf_b = [arr[i] <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">1</span>, len(arr), <span class="num">2</span>)]
+
+    <span class="cm"># Paso 2: Ordenar cada buffer</span>
+    buf_a.sort()
+    buf_b.sort()
+
+    <span class="cm"># Paso 3: Intercalar los buffers ordenados</span>
+    resultado = []
+    i = j = <span class="num">0</span>
+    <span class="kw">while</span> i &lt; len(buf_a) <span class="kw">and</span> j &lt; len(buf_b):
+        <span class="kw">if</span> buf_a[i] &lt;= buf_b[j]:
+            resultado.append(buf_a[i]); i += <span class="num">1</span>
+        <span class="kw">else</span>:
+            resultado.append(buf_b[j]); j += <span class="num">1</span>
+    resultado += buf_a[i:]
+    resultado += buf_b[j:]
+    <span class="kw">return</span> resultado
+
+
+<span class="cm"># ── Modifica aquí tus datos ──────────────────</span>
+codigos = [<span class="num">304</span>, <span class="num">101</span>, <span class="num">502</span>, <span class="num">203</span>, <span class="num">405</span>, <span class="num">150</span>]
+
+buf_a = [codigos[i] <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">0</span>, len(codigos), <span class="num">2</span>)]
+buf_b = [codigos[i] <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">1</span>, len(codigos), <span class="num">2</span>)]
+
+print(<span class="str">f"Original : {codigos}"</span>)
+print(<span class="str">f"Buffer A : {buf_a}"</span>)
+print(<span class="str">f"Buffer B : {buf_b}"</span>)
+print(<span class="str">f"Ordenado : {<span class="fn">mezcla_equilibrada</span>(codigos)}"</span>)`
+];
+
+const ALGO_NAMES = ['Intercalación','Mezcla Directa','Mezcla Equilibrada'];
+const ALGO_COLORS = ['var(--accent0)','var(--accent1)','var(--accent2)'];
+const speeds = [1800,1200,750,400,200];
+
+let algo = 0, steps = [], cur = -1, playTimer = null, curSpeed = 750;
+
+function selectAlgo(a) {
+  algo = a;
+  [0,1,2].forEach(i => {
+    const b = document.getElementById('ab'+i);
+    b.className = 'algo-btn' + (i===a ? ' active-'+a : '');
+  });
+  document.getElementById('code-title').textContent = ALGO_NAMES[a] + ' — Python';
+  document.getElementById('code-view').innerHTML = CODES[a];
+  resetVis();
+}
+
+function usePreset(v) {
+  document.getElementById('data-in').value = v;
+  onInputChange();
+}
+function randPreset() {
+  const n = 8, arr = [];
+  while(arr.length < n) { const v = Math.floor(Math.random()*90)+10; if(!arr.includes(v)) arr.push(v); }
+  usePreset(arr.join(', '));
+}
+
+function getData() {
+  const raw = document.getElementById('data-in').value;
+  return raw.split(',').map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n));
+}
+function onInputChange() {
+  const d = getData();
+  const e = document.getElementById('err');
+  if(d.length < 2) { e.textContent = 'Ingresa al menos 2 números.'; return; }
+  if(d.length > 50) { e.textContent = 'Máximo 50 números recomendado.'; }
+  else e.textContent = '';
+}
+
+function validate() {
+  const d = getData();
+  if(d.length < 2) { document.getElementById('err').textContent = 'Ingresa al menos 2 números válidos.'; return null; }
+  document.getElementById('err').textContent = '';
+  return d;
+}
+
+function updateSpeed() {
+  const v = parseInt(document.getElementById('speed').value);
+  const lbls = ['muy lento','lento','normal','rápido','muy rápido'];
+  document.getElementById('speed-lbl').textContent = lbls[v-1];
+  curSpeed = speeds[v-1];
+}
+
+// ── STEP GENERATORS ──
+
+function genIntercalacion(arr) {
+  const st = [];
+  const orig = [...arr];
+  st.push({ title:'Arreglo original', desc:`${arr.length} elementos. La intercalación divide recursivamente por la mitad hasta tener elementos individuales, luego los mezcla.`,
+    mainArr:[...arr], mainCls:arr.map(()=>''), rows:[{lbl:'original',arr:[...arr],cls:arr.map(()=>'')}] });
+
+  function ms(a, depth) {
+    if(a.length <= 1) return a;
+    const mid = Math.floor(a.length/2);
+    const L = a.slice(0,mid), R = a.slice(mid);
+    st.push({ title:`Dividir → [${L.join(',')}]  |  [${R.join(',')}]`,
+      desc:`Profundidad ${depth}: se parte en mitad izquierda y derecha.`,
+      mainArr:[...orig], mainCls: orig.map(v=>L.includes(v)?'c0':R.includes(v)?'c2':''),
+      rows:[{lbl:'izquierda',arr:[...L],cls:L.map(()=>'c0')},{lbl:'derecha',arr:[...R],cls:R.map(()=>'c2')}] });
+    const sL = ms(L, depth+1);
+    const sR = ms(R, depth+1);
+    const merged = [], i2=[0], j2=[0];
+    const tmpL=[...sL], tmpR=[...sR];
+    while(i2[0]<tmpL.length && j2[0]<tmpR.length) {
+      if(tmpL[i2[0]]<=tmpR[j2[0]]) merged.push(tmpL[i2[0]++]); else merged.push(tmpR[j2[0]++]);
+    }
+    const result = [...merged,...tmpL.slice(i2[0]),...tmpR.slice(j2[0])];
+    st.push({ title:`Intercalar → [${result.join(', ')}]`,
+      desc:`Se combinan [${sL.join(',')}] y [${sR.join(',')}] tomando el menor elemento cada vez.`,
+      mainArr:[...result], mainCls: result.map(()=>'c1'),
+      rows:[{lbl:'sub-izq',arr:[...sL],cls:sL.map(()=>'c0')},{lbl:'sub-der',arr:[...sR],cls:sR.map(()=>'c2')},{lbl:'resultado',arr:[...result],cls:result.map(()=>'c1')}] });
+    return result;
+  }
+  const final = ms([...arr], 1);
+  st.push({ title:'✓ Ordenamiento completado',
+    desc:`Intercalación finalizada. Resultado: [${final.join(', ')}]`,
+    mainArr:[...final], mainCls:final.map(()=>'c1'),
+    rows:[{lbl:'ordenado',arr:[...final],cls:final.map(()=>'c1')}] });
+  return st;
+}
+
+function genMezclaDirecta(arr) {
+  const st = [];
+  st.push({ title:'Arreglo original', desc:'Mezcla Directa detecta secuencias ya ordenadas (runs) naturalmente, sin forzar divisiones.',
+    mainArr:[...arr], mainCls:arr.map(()=>''), rows:[{lbl:'original',arr:[...arr],cls:arr.map(()=>'')}] });
+
+  function getRuns(a) {
+    const runs=[]; let i=0;
+    while(i<a.length){ const run=[a[i]]; while(i+1<a.length&&a[i]<=a[i+1]){i++;run.push(a[i]);} runs.push(run);i++; }
+    return runs;
+  }
+  function mergeLists(a,b){ const r=[]; let i=0,j=0; while(i<a.length&&j<b.length){if(a[i]<=b[j])r.push(a[i++]);else r.push(b[j++]);} return [...r,...a.slice(i),...b.slice(j)]; }
+
+  const runs0 = getRuns([...arr]);
+  st.push({ title:`Detectar runs: ${runs0.length} secuencias encontradas`,
+    desc:`Runs naturalmente ordenados: ${runs0.map(r=>'['+r.join(',')+']').join('  ')}`,
+    mainArr:[...arr], mainCls:arr.map(()=>'c2'),
+    rows: runs0.map((r,i)=>({lbl:`run ${i+1}`,arr:[...r],cls:r.map(()=>'c2')})) });
+
+  let runs = runs0.map(r=>[...r]);
+  let pass = 1;
+  while(runs.length > 1) {
+    const next = [];
+    for(let i=0; i<runs.length; i+=2) {
+      if(i+1<runs.length) {
+        const m = mergeLists(runs[i], runs[i+1]);
+        st.push({ title:`Pasada ${pass}: mezclar [${runs[i].join(',')}] + [${runs[i+1].join(',')}]`,
+          desc:`Se intercalan dos runs para formar una secuencia más larga: [${m.join(', ')}]`,
+          mainArr:[...m], mainCls:m.map(()=>'cr'),
+          rows:[{lbl:'run A',arr:[...runs[i]],cls:runs[i].map(()=>'c0')},{lbl:'run B',arr:[...runs[i+1]],cls:runs[i+1].map(()=>'c2')},{lbl:'mezclado',arr:[...m],cls:m.map(()=>'cr')}] });
+        next.push(m);
+      } else { next.push(runs[i]); }
+    }
+    runs = next; pass++;
+  }
+  const final = runs[0]||[];
+  st.push({ title:'✓ Ordenamiento completado',
+    desc:`Mezcla Directa finalizada en ${pass-1} pasada(s). Resultado: [${final.join(', ')}]`,
+    mainArr:[...final], mainCls:final.map(()=>'c1'),
+    rows:[{lbl:'ordenado',arr:[...final],cls:final.map(()=>'c1')}] });
+  return st;
+}
+
+function genMezclaEquil(arr) {
+  const st = [];
+  const bufA = arr.filter((_,i)=>i%2===0);
+  const bufB = arr.filter((_,i)=>i%2!==0);
+  const sA = [...bufA].sort((a,b)=>a-b);
+  const sB = [...bufB].sort((a,b)=>a-b);
+
+  st.push({ title:'Arreglo original', desc:'Mezcla Equilibrada distribuye los elementos alternadamente en dos buffers, los ordena por separado y los intercala.',
+    mainArr:[...arr], mainCls:arr.map(()=>''), rows:[{lbl:'original',arr:[...arr],cls:arr.map(()=>'')}] });
+
+  st.push({ title:'Paso 1: Distribuir en Buffer A (índices pares)',
+    desc:`Elementos en posiciones 0,2,4,… van al Buffer A: [${bufA.join(', ')}]`,
+    mainArr:[...arr], mainCls:arr.map((_,i)=>i%2===0?'c0':''),
+    rows:[{lbl:'buffer A',arr:[...bufA],cls:bufA.map(()=>'c0')},{lbl:'buffer B',arr:[...bufB],cls:bufB.map(()=>'')}] });
+
+  st.push({ title:'Paso 2: Distribuir en Buffer B (índices impares)',
+    desc:`Elementos en posiciones 1,3,5,… van al Buffer B: [${bufB.join(', ')}]`,
+    mainArr:[...arr], mainCls:arr.map((_,i)=>i%2!==0?'c2':'c0'),
+    rows:[{lbl:'buffer A',arr:[...bufA],cls:bufA.map(()=>'c0')},{lbl:'buffer B',arr:[...bufB],cls:bufB.map(()=>'c2')}] });
+
+  st.push({ title:'Paso 3: Ordenar Buffer A',
+    desc:`[${bufA.join(', ')}]  →  [${sA.join(', ')}]`,
+    mainArr:[...sA], mainCls:sA.map(()=>'c0'),
+    rows:[{lbl:'buffer A ord.',arr:[...sA],cls:sA.map(()=>'c0')},{lbl:'buffer B orig.',arr:[...bufB],cls:bufB.map(()=>'c2')}] });
+
+  st.push({ title:'Paso 4: Ordenar Buffer B',
+    desc:`[${bufB.join(', ')}]  →  [${sB.join(', ')}]`,
+    mainArr:[...sB], mainCls:sB.map(()=>'c2'),
+    rows:[{lbl:'buffer A ord.',arr:[...sA],cls:sA.map(()=>'c0')},{lbl:'buffer B ord.',arr:[...sB],cls:sB.map(()=>'c2')}] });
+
+  const merged=[], i2=[0],j2=[0];
+  const tA=[...sA],tB=[...sB];
+  while(i2[0]<tA.length&&j2[0]<tB.length){if(tA[i2[0]]<=tB[j2[0]])merged.push(tA[i2[0]++]);else merged.push(tB[j2[0]++]);}
+  const final=[...merged,...tA.slice(i2[0]),...tB.slice(j2[0])];
+
+  st.push({ title:'Paso 5: Intercalar ambos buffers ordenados',
+    desc:`Se comparan elemento a elemento y se toma siempre el menor. Resultado: [${final.join(', ')}]`,
+    mainArr:[...final], mainCls:final.map(()=>'cr'),
+    rows:[{lbl:'buffer A',arr:[...sA],cls:sA.map(()=>'c0')},{lbl:'buffer B',arr:[...sB],cls:sB.map(()=>'c2')},{lbl:'intercalado',arr:[...final],cls:final.map(()=>'cr')}] });
+
+  st.push({ title:'✓ Ordenamiento completado',
+    desc:`Mezcla Equilibrada finalizada. Resultado: [${final.join(', ')}]`,
+    mainArr:[...final], mainCls:final.map(()=>'c1'),
+    rows:[{lbl:'ordenado',arr:[...final],cls:final.map(()=>'c1')}] });
+  return st;
+}
+
+// ── RENDER ──
+
+function renderStep() {
+  const d = getData();
+  if(!d||!d.length) return;
+  const max = Math.max(...d, 1);
+  const pct = cur < 0 ? 0 : Math.round(((cur+1)/steps.length)*100);
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('scounter').textContent = cur<0 ? '0 / '+steps.length : (cur+1)+' / '+steps.length;
+
+  if(cur < 0) {
+    renderBars(d, d.map(()=>''), max);
+    renderRows([{lbl:'original',arr:d,cls:d.map(()=>'')}]);
+    document.getElementById('step-title').textContent = 'Listo para comenzar';
+    document.getElementById('step-desc').textContent = 'Presiona "Siguiente" o "Auto" para iniciar la visualización paso a paso.';
+    return;
+  }
+  const s = steps[cur];
+  renderBars(s.mainArr||d, s.mainCls||(d.map(()=>'')), Math.max(...(s.mainArr||d),1));
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  renderRows(s.rows||[]);
+}
+
+function renderBars(arr, cls, max) {
+  const wrap = document.getElementById('bars');
+  wrap.innerHTML = '';
+  arr.forEach((v,i) => {
+    const h = Math.max(Math.round((v/max)*120), 4);
+    const colMap = {'c0':ALGO_COLORS[0],'c1':ALGO_COLORS[1],'c2':ALGO_COLORS[2],'cr':'var(--red)','':`rgba(255,255,255,0.12)`};
+    const col = colMap[cls[i]]||colMap[''];
+    const col2 = document.createElement('div');
+    col2.className = 'bar-col';
+    col2.innerHTML = `<div class="bar" style="height:${h}px;background:${col}"></div><div class="bar-num">${v}</div>`;
+    wrap.appendChild(col2);
+  });
+}
+
+function renderRows(rows) {
+  const wrap = document.getElementById('rows-wrap');
+  wrap.innerHTML = '';
+  rows.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'arr-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'row-label';
+    lbl.textContent = r.lbl;
+    row.appendChild(lbl);
+    (r.arr||[]).forEach((v,i) => {
+      const c = document.createElement('div');
+      c.className = 'cell ' + (r.cls&&r.cls[i]?r.cls[i]:'');
+      c.textContent = v;
+      row.appendChild(c);
+    });
+    wrap.appendChild(row);
+  });
+}
+
+// ── CONTROLS ──
+
+function startVis() {
+  stopPlay();
+  const d = validate();
+  if(!d) return;
+  if(algo===0) steps = genIntercalacion([...d]);
+  else if(algo===1) steps = genMezclaDirecta([...d]);
+  else steps = genMezclaEquil([...d]);
+  cur = -1;
+  renderStep();
+}
+
+function step(dir) {
+  if(steps.length===0) { startVis(); return; }
+  cur = Math.max(-1, Math.min(steps.length-1, cur+dir));
+  renderStep();
+}
+
+function resetVis() {
+  stopPlay();
+  cur = -1; steps = [];
+  const d = getData();
+  if(d&&d.length>=2) { renderBars(d,d.map(()=>''),Math.max(...d,1)); renderRows([{lbl:'original',arr:d,cls:d.map(()=>'')}]); }
+  document.getElementById('step-title').textContent = 'Listo para comenzar';
+  document.getElementById('step-desc').textContent = 'Ingresa números y presiona Ejecutar.';
+  document.getElementById('prog').style.width = '0';
+  document.getElementById('scounter').textContent = '— / —';
+}
+
+function togglePlay() {
+  if(playTimer) { stopPlay(); return; }
+  if(steps.length===0) startVis();
+  const btn = document.getElementById('btn-play');
+  btn.textContent = '⏸ Pausar'; btn.className = 'play-btn pause';
+  function tick() {
+    if(cur >= steps.length-1) { stopPlay(); return; }
+    step(1);
+    playTimer = setTimeout(tick, curSpeed);
+  }
+  tick();
+}
+function stopPlay() {
+  if(playTimer) { clearTimeout(playTimer); playTimer=null; }
+  const btn = document.getElementById('btn-play');
+  btn.textContent = '⏵ Auto'; btn.className = 'play-btn';
+}
+
+// ── FILE LOADING ──
+
+const fileData = { 1: null, 2: null };
+
+// Extract all numbers from any string (handles CSV, TSV, JSON text, XML text, plain text, etc.)
+function extractNumbers(text) {
+  // Strip XML/HTML tags if present
+  text = text.replace(/<[^>]+>/g, ' ');
+  // Strip JSON brackets/braces/quotes
+  text = text.replace(/[{}\[\]"'`]/g, ' ');
+  // Split on any non-numeric separator (keep minus and dot for negatives/decimals)
+  return text
+    .split(/[^0-9.\-]+/)
+    .map(s => parseFloat(s.trim()))
+    .filter(n => !isNaN(n) && isFinite(n));
+}
+
+// Parse XLSX binary — reads every cell from every row/column of the first sheet
+function parseXlsx(buffer) {
+  if (window._XLSX) {
+    try {
+      const wb = window._XLSX.read(new Uint8Array(buffer), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      // sheet_to_json with header:1 returns all rows as arrays, covering ALL columns
+      const rows = window._XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      const nums = [];
+      rows.forEach(row => {
+        row.forEach(cell => {
+          const n = parseFloat(String(cell).trim());
+          if (!isNaN(n) && isFinite(n)) nums.push(n);
+        });
+      });
+      return nums;
+    } catch(e) { return []; }
+  }
+  // Fallback: scan raw binary for number patterns
+  const text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(buffer));
+  return extractNumbers(text);
+}
+
+// Load SheetJS once on demand
+function ensureSheetJS(cb) {
+  if (window._XLSX) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload = () => { window._XLSX = XLSX; cb(); };
+  s.onerror = () => { window._XLSX = null; cb(); };
+  document.head.appendChild(s);
+}
+
+function setFileStatus(msg) {
+  document.getElementById('file-status').textContent = msg;
+}
+
+function loadFile(slot, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  setFileStatus('Leyendo ' + file.name + '…');
+
+  const finish = (nums) => {
+    if (!nums || nums.length < 1) {
+      setFileStatus('Archivo ' + slot + ': sin números válidos.');
+      return;
+    }
+    fileData[slot] = nums;
+    document.getElementById('fname' + slot).textContent = file.name + '  (' + nums.length + ' núm.)';
+    document.getElementById('slot' + slot).classList.add('loaded');
+    updateMergeBtn();
+  };
+
+  // Excel / ODS / binary spreadsheets → need SheetJS
+  if (['xlsx','xls','ods','xlsm','xlsb'].includes(ext)) {
+    ensureSheetJS(() => {
+      const r = new FileReader();
+      r.onload = e => finish(parseXlsx(e.target.result));
+      r.readAsArrayBuffer(file);
+    });
+    return;
+  }
+
+  // PDF → extract text via FileReader (gets embedded text layer)
+  if (ext === 'pdf') {
+    const r = new FileReader();
+    r.onload = e => {
+      const text = new TextDecoder('latin1').decode(new Uint8Array(e.target.result));
+      finish(extractNumbers(text));
+    };
+    r.readAsArrayBuffer(file);
+    return;
+  }
+
+  // Everything else (txt, csv, tsv, json, xml, html, log, dat, md, yaml, …) → read as text
+  const reader = new FileReader();
+  reader.onload = e => finish(extractNumbers(e.target.result));
+  reader.onerror = () => setFileStatus('Error al leer el archivo.');
+
+  // Try UTF-8 first; if binary-ish, try latin-1
+  reader.readAsText(file, 'UTF-8');
+}
+
+function updateMergeBtn() {
+  const btn = document.getElementById('btn-merge');
+  btn.disabled = !(fileData[1] || fileData[2]);
+  if (fileData[1] && fileData[2]) {
+    setFileStatus('Listos: ' + fileData[1].length + ' + ' + fileData[2].length + ' = ' + (fileData[1].length + fileData[2].length) + ' núm.');
+  } else if (fileData[1]) {
+    setFileStatus('Archivo 1 listo (' + fileData[1].length + ' núm.)');
+  } else if (fileData[2]) {
+    setFileStatus('Archivo 2 listo (' + fileData[2].length + ' núm.)');
+  }
+}
+
+function mergeFiles() {
+  let combined = [];
+  if (fileData[1]) combined = combined.concat(fileData[1]);
+  if (fileData[2]) combined = combined.concat(fileData[2]);
+  if (combined.length < 2) {
+    setFileStatus('Necesitas al menos 2 números en total.');
+    return;
+  }
+  if (combined.length > 50) {
+    setFileStatus('Se usarán los primeros 50 números para la visualización.');
+    combined = combined.slice(0, 50);
+  }
+  usePreset(combined.join(', '));
+  startVis();
+}
+
+// Init
+selectAlgo(0);
+const d0 = getData();
+if(d0&&d0.length>=2) renderBars(d0,d0.map(()=>''),Math.max(...d0,1));
+</script>
+</body>
+</html>
